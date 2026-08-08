@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 import config
-from src import combiner, content_extractor, csv_loader, fetcher, note_builder
+from src import combiner, content_extractor, csv_loader, fetcher, home_builder, note_builder
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -55,8 +55,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     combine.set_defaults(func=_cmd_combine)
 
+    home = subparsers.add_parser(
+        "home", help="Generate the root-level vault Home.md overview page."
+    )
+    home.add_argument(
+        "--vault",
+        type=Path,
+        default=config.VAULT_DIR,
+        help="Vault directory (default: %(default)s).",
+    )
+    home.set_defaults(func=_cmd_home)
+
     all_ = subparsers.add_parser(
-        "all", help="Run fetch, then build-notes, then combine in sequence."
+        "all", help="Run fetch, then build-notes, then combine, then home in sequence."
     )
     _add_common_path_args(all_, include_vault=True)
     _add_version_arg(all_)
@@ -145,6 +156,11 @@ def _cmd_combine(args: argparse.Namespace) -> None:
         _combine_one(args.vault, version, args.force)
 
 
+def _cmd_home(args: argparse.Namespace) -> None:
+    path = home_builder.build_home(args.vault)
+    print(f"Built home page: {path}")
+
+
 def _combine_one(vault_dir: Path, version: int, force: bool) -> None:
     output = combiner.combine_version(vault_dir, version, force=force)
     if output is not None:
@@ -168,6 +184,7 @@ def _cmd_all(args: argparse.Namespace) -> None:
     _cmd_fetch(args)
     _cmd_build_notes(args)
     _cmd_combine(args)
+    _cmd_home(args)
 
 
 def main(argv: list[str] | None = None) -> int:

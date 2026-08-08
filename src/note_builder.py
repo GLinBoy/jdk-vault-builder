@@ -57,6 +57,7 @@ def build_note(
         .get_template(_TEMPLATE_NAME)
         .render(
             link=link,
+            tags=[f"jdk_{link.jdk_version}", link.link_type],
             extracted_text=extracted.text,
             fetched_date=datetime.now(timezone.utc).date().isoformat(),
         )

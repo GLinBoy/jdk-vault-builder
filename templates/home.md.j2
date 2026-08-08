@@ -1,0 +1,18 @@
+# JDK Vault
+
+This vault documents Java JDK changes across every major release. For each JDK
+version it holds the archived project page, the official release notes, and its
+JDK Enhancement Proposals (JEPs), each extracted from the original source as
+readable text.
+
+Notes are independent markdown files connected through inline tags:
+`#jdk/{version}` for the release and `#link-type/{type}` (project-page,
+release-notes, jep) for the kind of content. No note depends on another — the
+tags are what Obsidian uses to link and group them.
+
+## Versions
+
+| Version | Project page | Release notes | JEPs | Total | Combined |
+| ------- | ------------ | ------------- | ---- | ----- | -------- |
+{% for v in versions %}| [[JDK {{ v.jdk_version }} Project Page]] | {{ v.project_page }} | {{ v.release_notes }} | {{ v.jep }} | {{ v.total }} |{% if v.has_combined %} [[JDK {{ v.jdk_version }} - Full]]{% else %} —{% endif %} |
+{% endfor %}

@@ -5,6 +5,7 @@ jep_number: {{ link.jep_number | yaml_scalar }}
 title: {{ link.title | yaml_scalar }}
 source_url: {{ link.url | yaml_scalar }}
 fetched: {{ fetched_date | yaml_scalar }}
+tags: [{{ tags | join(", ") }}]
 ---
 
 # {{ link.title }}
@@ -13,4 +14,4 @@ fetched: {{ fetched_date | yaml_scalar }}
 
 {{ extracted_text }}
 
-Tags: #jdk/{{ link.jdk_version }} #link-type/{{ link.link_type | replace("_", "-") }}
+Tags: #jdk_{{ link.jdk_version }}

@@ -90,13 +90,17 @@ def _assert_notes_have_tags_and_no_wikilinks(vault_dir: Path) -> None:
     for path in (vault_dir / "JDK 6").glob("*.md"):
         content = path.read_text(encoding="utf-8")
         assert "[[" not in content
-        assert "Tags: #jdk/6" in content
+        assert "tags: [jdk_6, " in content
+        assert "Tags: #jdk_6" in content
     for path in (vault_dir / "JDK 9").rglob("*.md"):
+        if "_combined" in path.parts:
+            continue
         content = path.read_text(encoding="utf-8")
         assert "[[" not in content
-        assert "Tags: #jdk/9" in content
+        assert "tags: [jdk_9, " in content
+        assert "Tags: #jdk_9" in content
         if path.parent.name == "jep":
-            assert "#link-type/jep" in content
+            assert "tags: [jdk_9, jep]" in content
 
 
 def test_all_end_to_end_builds_expected_vault(offline_pipeline) -> None:
@@ -111,6 +115,23 @@ def test_all_end_to_end_builds_expected_vault(offline_pipeline) -> None:
     _assert_notes_have_tags_and_no_wikilinks(vault_dir)
     assert len(list(cache_dir.glob("*.html"))) == 6
     assert mock_get.call_count == 6
+
+
+def test_all_produces_vault_home_page(offline_pipeline) -> None:
+    _, argv, _, vault_dir = offline_pipeline
+
+    assert main.main(argv) == 0
+
+    home = vault_dir / "Home.md"
+    assert home.is_file()
+    content = home.read_text(encoding="utf-8")
+    assert "# JDK Vault" in content
+    jdk6_row = next(line for line in content.splitlines() if line.startswith("| [[JDK 6"))
+    jdk9_row = next(line for line in content.splitlines() if line.startswith("| [[JDK 9"))
+    assert "| 1 | 1 | 0 | 2 |" in jdk6_row
+    assert "| 1 | 1 | 2 | 4 |" in jdk9_row
+    assert "[[JDK 6 - Full]]" in content
+    assert "[[JDK 9 - Full]]" in content
 
 
 def test_all_combined_files_contain_all_notes(offline_pipeline) -> None:
