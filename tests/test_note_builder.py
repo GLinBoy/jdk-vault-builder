@@ -7,7 +7,6 @@ import pytest
 from src.content_extractor import ExtractedContent
 from src.csv_loader import JdkLink, load_csv
 from src.note_builder import build_note, find_parent_links
-
 from tests.test_csv_loader import SAMPLE_CSV
 
 
@@ -68,9 +67,7 @@ def test_build_note_renders_frontmatter_and_backlinks(
     assert "Some extracted body text." in content
 
 
-def test_build_note_writes_into_version_folder(
-    all_links: list[JdkLink], tmp_path: Path
-) -> None:
+def test_build_note_writes_into_version_folder(all_links: list[JdkLink], tmp_path: Path) -> None:
     vault_dir = tmp_path / "vault"
     link = _link_named(all_links, "Process API Updates")
     extracted = ExtractedContent(text="body", page_title=None)

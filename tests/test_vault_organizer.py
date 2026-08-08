@@ -130,7 +130,9 @@ def test_note_path_for_sanitizes_title(tmp_path: Path) -> None:
 
 
 def test_note_path_for_does_not_create_directories(tmp_path: Path) -> None:
-    link = JdkLink(9, "project_page", None, "JDK 9 Project Page", "https://openjdk.org/projects/jdk9")
+    link = JdkLink(
+        9, "project_page", None, "JDK 9 Project Page", "https://openjdk.org/projects/jdk9"
+    )
     vault_dir = tmp_path / "vault"
 
     note_path_for(link, vault_dir)

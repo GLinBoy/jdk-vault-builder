@@ -1,1 +1,7 @@
-# Templates are wired up in Phase 5 (note_builder.py) and Phase 6 (combiner.py).
+# JDK {{ jdk_version }} — Full Reference
+
+{% for note in notes -%}
+## {{ note.title }}
+
+{{ note.body }}
+{% endfor -%}
