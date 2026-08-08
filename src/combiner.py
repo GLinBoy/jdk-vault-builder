@@ -100,7 +100,7 @@ def combine_version(vault_dir: Path, jdk_version: int, force: bool = False) -> P
     version_dir = vault_dir / f"JDK {jdk_version}"
     output_path = version_dir / "_combined" / f"JDK {jdk_version} - Full.md"
 
-    note_paths = [p for p in version_dir.glob("*.md") if p.parent != output_path.parent]
+    note_paths = [p for p in version_dir.rglob("*.md") if p.parent != output_path.parent]
     if not note_paths:
         return None
 

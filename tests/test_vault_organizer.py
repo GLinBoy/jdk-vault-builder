@@ -6,6 +6,7 @@ import pytest
 
 from src.csv_loader import JdkLink
 from src.vault_organizer import (
+    ensure_jep_folder,
     ensure_vault_root,
     ensure_version_folder,
     note_path_for,
@@ -76,6 +77,37 @@ def test_ensure_version_folder_returns_same_path_when_called_twice(tmp_path: Pat
     assert first.is_dir()
 
 
+# --- ensure_jep_folder -------------------------------------------------------
+
+
+def test_ensure_jep_folder_creates_nested_jep_subfolder(tmp_path: Path) -> None:
+    vault_dir = tmp_path / "vault"
+
+    folder = ensure_jep_folder(vault_dir, 9)
+
+    assert folder == vault_dir / "JDK 9" / "jep"
+    assert folder.is_dir()
+
+
+def test_ensure_jep_folder_also_creates_version_folder(tmp_path: Path) -> None:
+    vault_dir = tmp_path / "vault"
+
+    ensure_jep_folder(vault_dir, 17)
+
+    assert (vault_dir / "JDK 17").is_dir()
+    assert (vault_dir / "JDK 17" / "jep").is_dir()
+
+
+def test_ensure_jep_folder_returns_same_path_when_called_twice(tmp_path: Path) -> None:
+    vault_dir = tmp_path / "vault"
+
+    first = ensure_jep_folder(vault_dir, 9)
+    second = ensure_jep_folder(vault_dir, 9)
+
+    assert first == second == vault_dir / "JDK 9" / "jep"
+    assert first.is_dir()
+
+
 # --- sanitize_filename -------------------------------------------------------
 
 
@@ -106,12 +138,21 @@ def test_sanitize_filename_falls_back_for_all_invalid(title: str) -> None:
 
 
 def test_note_path_for_uses_version_folder(tmp_path: Path) -> None:
+    link = JdkLink(9, "project_page", None, "JDK 9 Project Page", "https://openjdk.org/projects/jdk9")
+    vault_dir = tmp_path / "vault"
+
+    path = note_path_for(link, vault_dir)
+
+    assert path == vault_dir / "JDK 9" / "JDK 9 Project Page.md"
+
+
+def test_note_path_for_jep_uses_jep_subfolder(tmp_path: Path) -> None:
     link = JdkLink(9, "jep", 110, "HTTP 2 Client", "https://openjdk.org/jeps/110")
     vault_dir = tmp_path / "vault"
 
     path = note_path_for(link, vault_dir)
 
-    assert path == vault_dir / "JDK 9" / "HTTP 2 Client.md"
+    assert path == vault_dir / "JDK 9" / "jep" / "HTTP 2 Client.md"
 
 
 def test_note_path_for_sanitizes_title(tmp_path: Path) -> None:
@@ -126,7 +167,7 @@ def test_note_path_for_sanitizes_title(tmp_path: Path) -> None:
 
     path = note_path_for(link, vault_dir)
 
-    assert path == vault_dir / "JDK 9" / "JEP-110 HTTP 2 Client.md"
+    assert path == vault_dir / "JDK 9" / "jep" / "JEP-110 HTTP 2 Client.md"
 
 
 def test_note_path_for_does_not_create_directories(tmp_path: Path) -> None:

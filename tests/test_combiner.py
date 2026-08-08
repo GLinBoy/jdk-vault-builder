@@ -32,6 +32,8 @@ def _write_note(
     body: str | None = None,
 ) -> Path:
     folder = vault_dir / f"JDK {jdk_version}"
+    if link_type == "jep":
+        folder = folder / "jep"
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"{title}.md"
     if body is None:
@@ -149,6 +151,23 @@ def test_combine_version_writes_merged_file(jdk9_vault: Path) -> None:
     ]
     assert section_order == sorted(section_order)
     assert "Process body." in content
+    assert "HTTP body." in content
+
+
+def test_combine_version_includes_jep_notes_in_subfolder(tmp_path: Path) -> None:
+    vault_dir = tmp_path / "vault"
+    _write_note(vault_dir, 9, link_type="project_page", title="JDK 9 Project Page")
+    _write_note(vault_dir, 9, link_type="release_notes", title="Java SE 9 What's New")
+    jep_path = _write_note(
+        vault_dir, 9, link_type="jep", jep_number=110, title="HTTP 2 Client", body="HTTP body."
+    )
+    assert jep_path == vault_dir / "JDK 9" / "jep" / "HTTP 2 Client.md"
+
+    output_path = combine_version(vault_dir, 9)
+
+    assert output_path is not None
+    content = output_path.read_text(encoding="utf-8")
+    assert "## HTTP 2 Client" in content
     assert "HTTP body." in content
 
 

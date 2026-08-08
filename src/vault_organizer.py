@@ -23,6 +23,14 @@ def ensure_version_folder(vault_dir: Path, jdk_version: int) -> Path:
     return folder
 
 
+def ensure_jep_folder(vault_dir: Path, jdk_version: int) -> Path:
+    """Create and return the ``vault_dir/JDK {version}/jep/`` folder."""
+
+    folder = ensure_version_folder(vault_dir, jdk_version) / "jep"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
 def sanitize_filename(title: str) -> str:
     """Return ``title`` safe to use as a file name while staying readable.
 
@@ -44,8 +52,11 @@ def note_path_for(link: JdkLink, vault_dir: Path) -> Path:
     """Compute the full note file path for ``link``.
 
     Pure computation — does not create any directories. The parent version
-    folder must be ensured separately (see ``ensure_version_folder``).
+    folder (and ``jep/`` subfolder for JEP links) must be ensured separately
+    (see ``ensure_version_folder`` / ``ensure_jep_folder``).
     """
 
     folder = vault_dir / f"JDK {link.jdk_version}"
+    if link.link_type == "jep":
+        folder = folder / "jep"
     return folder / f"{sanitize_filename(link.title)}.md"

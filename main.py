@@ -133,7 +133,7 @@ def _cmd_build_notes(args: argparse.Namespace) -> None:
             continue
         html = cache_path.read_text(encoding="utf-8")
         extracted = content_extractor.extract_content(html)
-        path = note_builder.build_note(link, extracted, links, args.vault)
+        path = note_builder.build_note(link, extracted, args.vault)
         print(f"Built note: {path}")
 
 

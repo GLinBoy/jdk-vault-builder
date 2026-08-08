@@ -21,9 +21,9 @@ exists.
 - **Raw content extraction** — HTML is reduced to clean readable text with
   `trafilatura` (a raw dump, not a summary), mirroring what the Obsidian Web
   Clipper browser extension produces.
-- **Per-version vault** — one folder per JDK version, with notes that link back
-  to their version's `project_page`/`release_notes` parents via Obsidian
-  `[[wikilinks]]` for free graph structure.
+- **Per-version vault** — one folder per JDK version (with a `jep/` subfolder
+  for JEP notes), where notes are Obsidian-free markdown connected via inline
+  tags (`#jdk/{version}`, `#link-type/{type}`) rather than wikilinks.
 - **Idempotent and safe** — notes are never overwritten once written; the
   per-version combined file is rebuilt from scratch and only overwritten with
   confirmation (or `--force`).
@@ -140,9 +140,11 @@ fetched: 2026-08-08
 ---
 ```
 
-JEP notes and other rows link back to their version's parents, e.g.
-`[[JDK 9 Project Page]] · [[Java SE 9 What's New]]`, which gives Obsidian its
-note-graph structure.
+Notes are Obsidian-free, independent markdown: no wikilinks or other
+Obsidian-specific syntax in the body. Cross-note connection happens through
+inline tags appended at the end of every note, e.g.
+`Tags: #jdk/9 #link-type/jep`. JEP notes live in a `jep/` subfolder under their
+version's folder.
 
 ## Development
 

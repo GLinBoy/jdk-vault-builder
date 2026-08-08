@@ -16,6 +16,7 @@ JDK9_TITLES = [
     "Process API Updates",
     "HTTP 2 Client",
 ]
+JDK9_JEP_TITLES = ["Process API Updates", "HTTP 2 Client"]
 
 
 def _marker(title: str) -> str:
@@ -79,7 +80,23 @@ def _assert_note_files(vault_dir: Path) -> None:
     for title in JDK6_TITLES:
         assert (vault_dir / "JDK 6" / f"{title}.md").is_file()
     for title in JDK9_TITLES:
-        assert (vault_dir / "JDK 9" / f"{title}.md").is_file()
+        folder = vault_dir / "JDK 9"
+        if title in JDK9_JEP_TITLES:
+            folder = folder / "jep"
+        assert (folder / f"{title}.md").is_file()
+
+
+def _assert_notes_have_tags_and_no_wikilinks(vault_dir: Path) -> None:
+    for path in (vault_dir / "JDK 6").glob("*.md"):
+        content = path.read_text(encoding="utf-8")
+        assert "[[" not in content
+        assert "Tags: #jdk/6" in content
+    for path in (vault_dir / "JDK 9").rglob("*.md"):
+        content = path.read_text(encoding="utf-8")
+        assert "[[" not in content
+        assert "Tags: #jdk/9" in content
+        if path.parent.name == "jep":
+            assert "#link-type/jep" in content
 
 
 def test_all_end_to_end_builds_expected_vault(offline_pipeline) -> None:
@@ -91,6 +108,7 @@ def test_all_end_to_end_builds_expected_vault(offline_pipeline) -> None:
     assert (vault_dir / "JDK 6").is_dir()
     assert (vault_dir / "JDK 9").is_dir()
     _assert_note_files(vault_dir)
+    _assert_notes_have_tags_and_no_wikilinks(vault_dir)
     assert len(list(cache_dir.glob("*.html"))) == 6
     assert mock_get.call_count == 6
 
@@ -146,7 +164,10 @@ def test_all_version_filter_builds_only_that_version(pipeline_paths, mocker) -> 
     assert (vault_dir / "JDK 9").is_dir()
     assert not (vault_dir / "JDK 6").exists()
     for title in JDK9_TITLES:
-        assert (vault_dir / "JDK 9" / f"{title}.md").is_file()
+        folder = vault_dir / "JDK 9"
+        if title in JDK9_JEP_TITLES:
+            folder = folder / "jep"
+        assert (folder / f"{title}.md").is_file()
     combined9 = vault_dir / "JDK 9" / "_combined" / "JDK 9 - Full.md"
     content = combined9.read_text(encoding="utf-8")
     assert "## JDK 9 Project Page" in content
@@ -156,17 +177,19 @@ def test_all_version_filter_builds_only_that_version(pipeline_paths, mocker) -> 
 def test_all_rerun_is_idempotent_and_recombine_prompts(offline_pipeline, mocker) -> None:
     mock_get, argv, _, vault_dir = offline_pipeline
 
+    def _notes_snapshot() -> list[str]:
+        return sorted(
+            path.read_text(encoding="utf-8")
+            for path in (vault_dir / "JDK 9").rglob("*.md")
+            if "_combined" not in path.parts
+        )
+
     assert main.main(argv) == 0
-    notes_before = sorted(
-        path.read_text(encoding="utf-8") for path in (vault_dir / "JDK 9").glob("*.md")
-    )
+    notes_before = _notes_snapshot()
 
     input_mock = mocker.patch("builtins.input", return_value="n")
     assert main.main(argv) == 0
 
     assert mock_get.call_count == 6  # second run served entirely from cache
-    assert (
-        sorted(path.read_text(encoding="utf-8") for path in (vault_dir / "JDK 9").glob("*.md"))
-        == notes_before
-    )
+    assert _notes_snapshot() == notes_before
     input_mock.assert_called()  # recombine prompted instead of overwriting silently

@@ -9,8 +9,8 @@ fetched: {{ fetched_date | yaml_scalar }}
 
 # {{ link.title }}
 
-{% for parent in parent_links %}[[{{ parent.title }}]]{% if not loop.last %} · {% endif %}{% endfor %}
-
 ## Extracted Content
 
 {{ extracted_text }}
+
+Tags: #jdk/{{ link.jdk_version }} #link-type/{{ link.link_type | replace("_", "-") }}
