@@ -22,8 +22,8 @@ exists.
   `trafilatura` (a raw dump, not a summary), mirroring what the Obsidian Web
   Clipper browser extension produces.
 - **Per-version vault** — one folder per JDK version (with a `jep/` subfolder
-  for JEP notes), where notes are Obsidian-free markdown connected via inline
-  tags (`#jdk/{version}`, `#link-type/{type}`) rather than wikilinks.
+  for JEP notes), where notes are Obsidian-free markdown connected via tags
+  (`jdk_7`, link type) rather than wikilinks.
 - **Idempotent and safe** — notes are never overwritten once written; the
   per-version combined file is rebuilt from scratch and only overwritten with
   confirmation (or `--force`).
@@ -142,9 +142,10 @@ fetched: 2026-08-08
 
 Notes are Obsidian-free, independent markdown: no wikilinks or other
 Obsidian-specific syntax in the body. Cross-note connection happens through
-inline tags appended at the end of every note, e.g.
-`Tags: #jdk/9 #link-type/jep`. JEP notes live in a `jep/` subfolder under their
-version's folder.
+tags — the frontmatter `tags:` property carries both the version tag
+(`jdk_7`) and the link type (`project_page` / `release_notes` / `jep`), and
+every note body ends with a single `Tags: #jdk_{version}` line. JEP notes live
+in a `jep/` subfolder under their version's folder.
 
 ## Development
 

@@ -19,11 +19,11 @@ This tool is re-run every time a new JDK version is released — updates must be
 
 ```
 config.py               # all paths, constants, throttle settings, bot-challenge markers
-main.py                 # CLI entrypoint (argparse: fetch / build-notes / combine / all)
+main.py                 # CLI entrypoint (argparse: fetch / build-notes / combine / home / all)
 data/jdk_links.csv       # manually maintained source CSV (~350 rows and growing)
 cache/raw_pages/         # untouched HTML backups, keyed by sha256(url).html
 cache/fetch.log          # fetch run logs
-vault/                   # the generated Obsidian vault (one folder per JDK version)
+vault/                   # the generated Obsidian vault (one folder per JDK version + Home.md)
 src/
   csv_loader.py          # CSV parsing, validation, JdkLink dataclass, version grouping
   fetcher.py              # throttled HTTP fetch, disk cache, headless-browser fallback
@@ -31,9 +31,11 @@ src/
   vault_organizer.py      # folder/filename creation and path resolution
   note_builder.py         # renders individual notes from templates + frontmatter
   combiner.py             # merges all notes for one jdk_version into one file
+  home_builder.py         # generates the root-level vault Home.md overview page
 templates/
   note.md.j2              # single-note template
   combined.md.j2          # per-version combined-file template
+  home.md.j2              # vault root overview template
 tests/                    # pytest suite, one test file per src/ module + integration test
 ```
 
@@ -66,9 +68,10 @@ Do not add a state database, hash-comparison cache invalidation, or "last run" t
 ## Note & Vault Conventions
 
 - One markdown note per CSV row (per URL). `project_page` and `release_notes` rows are "parent" notes for their `jdk_version`.
-- Every note has YAML frontmatter: `jdk_version`, `link_type`, `jep_number`, `title`, `source_url`, `fetched`.
-- Notes are **Obsidian-free, independent markdown** — no `[[wikilink]]` or other Obsidian-specific syntax in the body. Cross-note connection happens through inline tags appended at the end of every note: `#jdk/{version}` and `#link-type/{type}` (type hyphenated: `project-page`, `release-notes`, `jep`). This is the deliberate replacement for the earlier wikilink-backlink scheme.
+- Every note has YAML frontmatter: `jdk_version`, `link_type`, `jep_number`, `title`, `source_url`, `fetched`, plus a `tags:` list holding the version tag (`jdk_7`) and the link type (`project_page`, `release_notes`, or `jep`).
+- Notes are **Obsidian-free, independent markdown** — no `[[wikilink]]` or other Obsidian-specific syntax in the body. Cross-note connection happens through tags: the frontmatter `tags:` property carries both `jdk_{version}` and the link type, and every note body ends with a single `Tags: #jdk_{version}` line (no link-type tag in the body). This is the deliberate replacement for the earlier wikilink-backlink scheme.
 - Vault folder structure: `vault/JDK {version}/` per version, with a `_combined/` subfolder holding that version's merged NotebookLM file. JEP notes live in a `jep/` subfolder (`vault/JDK {version}/jep/`); `project_page` and `release_notes` notes sit directly in the version folder.
+- A root-level `vault/Home.md` is regenerated on every `home`/`all` run (always overwritten, like the combiner output) — a hub page that explains the vault's purpose and summarizes its data: the versions present, note counts per version, counts by link type, and pointers to each version's combined file.
 - Because notes are never overwritten, an existing note only picks up a new format if it is **deleted and rebuilt** (from `cache/raw_pages/`, no network needed). The full vault was regenerated this way when the tag-based format was introduced.
 - Filenames are sanitized via `vault_organizer.sanitize_filename()` — never write raw titles containing filesystem-unsafe characters directly to disk.
 
