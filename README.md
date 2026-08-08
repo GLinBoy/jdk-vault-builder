@@ -65,7 +65,7 @@ All path arguments default to the constants in `config.py`:
 |---------------|----------------------------------------------------------------|
 | `--csv PATH`  | Path to the JDK links CSV (default: `data/jdk_links.csv`)      |
 | `--cache-dir` | Directory for cached raw HTML (default: `cache/`)              |
-| `--vault`     | Obsidian vault output directory (default: `vault/`)            |
+| `--vault`     | Obsidian vault output directory (default: `JDK Changes Vault/`) |
 | `--version N` | Restrict the run to a single `jdk_version` (e.g. `21`)         |
 | `--force`     | Overwrite existing combined files without prompting (`combine`, `all`) |
 
@@ -101,17 +101,17 @@ Running the same command again does no re-fetching and no re-note-building —
 cached HTML and existing notes are reused as-is. Only the combined files are
 rebuilt, and the `combine` step prompts for confirmation (`[y/N]`, default no)
 unless `--force` is passed. To refresh a specific page, delete its cached HTML
-file in `cache/raw_pages/` (or the note in `vault/`) and re-run.
+file in `cache/raw_pages/` (or the note in `JDK Changes Vault/`) and re-run.
 
 ## Project layout
 
 ```
 config.py                  Paths, throttle settings, user agent, bot-challenge markers
-main.py                    CLI entrypoint (argparse: fetch / build-notes / combine / all)
+main.py                    CLI entrypoint (argparse: fetch / build-notes / combine / home / all)
 data/jdk_links.csv         Source CSV of JDK release links (hand-maintained)
 cache/raw_pages/           Archived HTML backups, keyed by SHA-256 of the URL
 cache/fetch.log            Fetch run logs
-vault/                     Generated Obsidian vault (one folder per JDK version)
+JDK Changes Vault/         Generated Obsidian vault (one folder per JDK version)
 src/
   csv_loader.py            CSV parsing, validation, JdkLink dataclass, version grouping
   fetcher.py               Throttled HTTP fetch, disk cache, headless-browser fallback
@@ -119,9 +119,11 @@ src/
   vault_organizer.py       Folder/filename creation and path resolution
   note_builder.py          Renders individual notes from templates + frontmatter
   combiner.py              Merges notes for one JDK version into a single file
+  home_builder.py          Generates the root-level vault Home.md overview page
 templates/
-  note.md.j2               Single-note template (frontmatter + backlinks + content)
+  note.md.j2               Single-note template (frontmatter + content)
   combined.md.j2           Per-version combined-file template
+  home.md.j2               Vault root overview template
 tests/                     Pytest suite (one test file per src/ module + integration)
 ```
 
@@ -140,12 +142,14 @@ fetched: 2026-08-08
 ---
 ```
 
-Notes are Obsidian-free, independent markdown: no wikilinks or other
-Obsidian-specific syntax in the body. Cross-note connection happens through
-tags — the frontmatter `tags:` property carries both the version tag
-(`jdk_7`) and the link type (`project_page` / `release_notes` / `jep`), and
-every note body ends with a single `Tags: #jdk_{version}` line. JEP notes live
-in a `jep/` subfolder under their version's folder.
+Notes are Obsidian-free, independent markdown: no wikilinks, no trailing tags
+section, no other Obsidian-specific syntax in the body. Cross-note connection
+happens entirely through the frontmatter `tags:` property, which carries both
+the version tag (`jdk_7`) and the link type (`project_page` / `release_notes` /
+`jep`). JEP notes live in a `jep/` subfolder under their version's folder.
+
+Each version's combined `_combined/JDK {version} - Full.md` file ends with a
+`Tags: #jdk_{version}` line.
 
 ## Development
 
@@ -165,7 +169,7 @@ pytest
 The test suite covers every `src/` module plus an end-to-end integration test.
 Tests never make real network calls — `requests.get` and the Playwright
 fallback are mocked. Test artifacts are written to temporary directories, never
-to the real `cache/` or `vault/`.
+to the real `cache/` or `JDK Changes Vault/`.
 
 ```bash
 pytest -v

@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-extend-exclude = [".venv", "cache", "vault"]
+extend-exclude = [".venv", "cache", "vault", "JDK Changes Vault"]
 
 [tool.black]
 target-version = ["py310"]
@@ -15,4 +15,4 @@ line-length = 100
 
 [tool.mypy]
 python_version = "3.10"
-exclude = ["(^|/)cache/", "(^|/)vault/", "(^|/)venv/"]
+exclude = ["(^|/)cache/", "(^|/)vault/", "(^|/)JDK Changes Vault/", "(^|/)venv/"]

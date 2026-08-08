@@ -44,8 +44,7 @@ def test_build_note_renders_frontmatter_tags_and_no_wikilinks(
     assert "# HTTP 2 Client" in content
     assert "Some extracted body text." in content
     assert "tags: [jdk_9, jep]" in content
-    assert "Tags: #jdk_9" in content
-    assert "Tags: #link-type/jep" not in content
+    assert "Tags:" not in content
     assert "[[" not in content
 
 
@@ -87,7 +86,7 @@ def test_build_note_has_no_links_and_has_tags(tmp_path: Path) -> None:
     assert "## Extracted Content" in content
     assert "body text" in content
     assert "tags: [jdk_17, jep]" in content
-    assert "Tags: #jdk_17" in content
+    assert "Tags:" not in content
 
 
 def test_build_note_quotes_title_with_yaml_special_chars(tmp_path: Path) -> None:

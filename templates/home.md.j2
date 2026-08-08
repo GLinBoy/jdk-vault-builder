@@ -5,10 +5,10 @@ version it holds the archived project page, the official release notes, and its
 JDK Enhancement Proposals (JEPs), each extracted from the original source as
 readable text.
 
-Notes are independent markdown files connected through inline tags:
-`#jdk/{version}` for the release and `#link-type/{type}` (project-page,
-release-notes, jep) for the kind of content. No note depends on another — the
-tags are what Obsidian uses to link and group them.
+Notes are independent markdown files connected through tags in the YAML
+frontmatter: `jdk_{version}` for the release and the link type (`project_page`,
+`release_notes`, `jep`) for the kind of content. No note depends on another —
+the tags are what Obsidian uses to link and group them.
 
 ## Versions
 

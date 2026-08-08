@@ -7,8 +7,8 @@ cache/*
 !cache/raw_pages/
 cache/raw_pages/*
 !cache/raw_pages/.gitkeep
-vault/*
-!vault/.gitkeep
+JDK Changes Vault/*
+!JDK Changes Vault/.gitkeep
 
 ### Emacs ###
 # -*- mode: gitignore; -*-

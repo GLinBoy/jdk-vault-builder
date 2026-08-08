@@ -10,7 +10,7 @@ PROJECT_ROOT: Path = Path(__file__).resolve().parent
 
 CSV_PATH: Path = PROJECT_ROOT / "data" / "jdk_links.csv"
 CACHE_DIR: Path = PROJECT_ROOT / "cache"
-VAULT_DIR: Path = PROJECT_ROOT / "vault"
+VAULT_DIR: Path = PROJECT_ROOT / "JDK Changes Vault"
 
 FETCH_DELAY_SECONDS: float = 1.0
 FETCH_TIMEOUT_SECONDS: float = 15.0

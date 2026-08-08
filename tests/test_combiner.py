@@ -152,6 +152,7 @@ def test_combine_version_writes_merged_file(jdk9_vault: Path) -> None:
     assert section_order == sorted(section_order)
     assert "Process body." in content
     assert "HTTP body." in content
+    assert content.rstrip().endswith("Tags: #jdk_9")
 
 
 def test_combine_version_includes_jep_notes_in_subfolder(tmp_path: Path) -> None:
@@ -169,6 +170,7 @@ def test_combine_version_includes_jep_notes_in_subfolder(tmp_path: Path) -> None
     content = output_path.read_text(encoding="utf-8")
     assert "## HTTP 2 Client" in content
     assert "HTTP body." in content
+    assert content.rstrip().endswith("Tags: #jdk_9")
 
 
 def test_combine_version_does_not_prompt_when_output_is_absent(jdk9_vault: Path, mocker) -> None:

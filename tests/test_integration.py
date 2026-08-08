@@ -91,14 +91,14 @@ def _assert_notes_have_tags_and_no_wikilinks(vault_dir: Path) -> None:
         content = path.read_text(encoding="utf-8")
         assert "[[" not in content
         assert "tags: [jdk_6, " in content
-        assert "Tags: #jdk_6" in content
+        assert "Tags:" not in content
     for path in (vault_dir / "JDK 9").rglob("*.md"):
         if "_combined" in path.parts:
             continue
         content = path.read_text(encoding="utf-8")
         assert "[[" not in content
         assert "tags: [jdk_9, " in content
-        assert "Tags: #jdk_9" in content
+        assert "Tags:" not in content
         if path.parent.name == "jep":
             assert "tags: [jdk_9, jep]" in content
 
@@ -152,6 +152,8 @@ def test_all_combined_files_contain_all_notes(offline_pipeline) -> None:
     for title in JDK9_TITLES:
         assert f"## {title}" in content9
         assert _marker(title) in content9
+    assert content6.rstrip().endswith("Tags: #jdk_6")
+    assert content9.rstrip().endswith("Tags: #jdk_9")
 
 
 def test_all_version_filter_builds_only_that_version(pipeline_paths, mocker) -> None:
