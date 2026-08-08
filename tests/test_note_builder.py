@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from src.content_extractor import ExtractedContent
 from src.csv_loader import JdkLink, load_csv
@@ -89,6 +90,20 @@ def test_build_note_without_parents_renders_no_backlinks(tmp_path: Path) -> None
     assert "[[" not in content
     assert "## Extracted Content" in content
     assert "body text" in content
+
+
+def test_build_note_quotes_title_with_yaml_special_chars(tmp_path: Path) -> None:
+    vault_dir = tmp_path / "vault"
+    link = JdkLink(9, "jep", 222, "jshell: The Java Shell (Read-Eval-Print Loop)", "https://openjdk.org/jeps/222")
+    extracted = ExtractedContent(text="body text", page_title=None)
+
+    path = build_note(link, extracted, [link], vault_dir)
+
+    content = path.read_text(encoding="utf-8")
+    frontmatter = content[len("---\n") : content.index("\n---\n")]
+    meta = yaml.safe_load(frontmatter)
+    assert meta["title"] == "jshell: The Java Shell (Read-Eval-Print Loop)"
+    assert meta["source_url"] == "https://openjdk.org/jeps/222"
 
 
 def test_build_note_does_not_overwrite_existing_note(

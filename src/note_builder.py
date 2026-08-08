@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from functools import cache
 from pathlib import Path
 
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from src.content_extractor import ExtractedContent
@@ -13,10 +14,23 @@ from src.vault_organizer import ensure_version_folder, note_path_for
 _TEMPLATE_NAME = "note.md.j2"
 
 
+def _yaml_scalar(value: object) -> str:
+    """Render ``value`` as a single-line YAML scalar (quoted only when needed).
+
+    Plain strings stay unquoted; values that would be ambiguous in YAML (e.g.
+    titles containing ``": "`` or special characters) are quoted so the
+    frontmatter always parses back to the original string.
+    """
+    dumped = yaml.safe_dump(value, default_flow_style=False).removesuffix("\n...\n")
+    return dumped.rstrip("\n")
+
+
 @cache
 def _template_env() -> Environment:
     template_dir = Path(__file__).resolve().parent.parent / "templates"
-    return Environment(loader=FileSystemLoader(str(template_dir)), autoescape=False)
+    env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=False)
+    env.filters["yaml_scalar"] = _yaml_scalar
+    return env
 
 
 def find_parent_links(links: list[JdkLink], jdk_version: int) -> list[JdkLink]:

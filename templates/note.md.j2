@@ -1,10 +1,10 @@
 ---
-jdk_version: {{ link.jdk_version }}
-link_type: {{ link.link_type }}
-jep_number: {{ link.jep_number }}
-title: {{ link.title }}
-source_url: {{ link.url }}
-fetched: {{ fetched_date }}
+jdk_version: {{ link.jdk_version | yaml_scalar }}
+link_type: {{ link.link_type | yaml_scalar }}
+jep_number: {{ link.jep_number | yaml_scalar }}
+title: {{ link.title | yaml_scalar }}
+source_url: {{ link.url | yaml_scalar }}
+fetched: {{ fetched_date | yaml_scalar }}
 ---
 
 # {{ link.title }}
