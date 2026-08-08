@@ -67,8 +67,9 @@ Do not add a state database, hash-comparison cache invalidation, or "last run" t
 
 - One markdown note per CSV row (per URL). `project_page` and `release_notes` rows are "parent" notes for their `jdk_version`.
 - Every note has YAML frontmatter: `jdk_version`, `link_type`, `jep_number`, `title`, `source_url`, `fetched`.
-- Notes link back to their version's parent notes via Obsidian `[[wikilink]]` syntax — this is intentional, it gives free graph structure in Obsidian.
-- Vault folder structure: `vault/JDK {version}/` per version, with a `_combined/` subfolder holding that version's merged NotebookLM file.
+- Notes are **Obsidian-free, independent markdown** — no `[[wikilink]]` or other Obsidian-specific syntax in the body. Cross-note connection happens through inline tags appended at the end of every note: `#jdk/{version}` and `#link-type/{type}` (type hyphenated: `project-page`, `release-notes`, `jep`). This is the deliberate replacement for the earlier wikilink-backlink scheme.
+- Vault folder structure: `vault/JDK {version}/` per version, with a `_combined/` subfolder holding that version's merged NotebookLM file. JEP notes live in a `jep/` subfolder (`vault/JDK {version}/jep/`); `project_page` and `release_notes` notes sit directly in the version folder.
+- Because notes are never overwritten, an existing note only picks up a new format if it is **deleted and rebuilt** (from `cache/raw_pages/`, no network needed). The full vault was regenerated this way when the tag-based format was introduced.
 - Filenames are sanitized via `vault_organizer.sanitize_filename()` — never write raw titles containing filesystem-unsafe characters directly to disk.
 
 ## Git Workflow
@@ -103,7 +104,7 @@ All four must pass cleanly. Do not mark work complete, update `PLAN.md` status, 
 - Discovering/scraping new CSV rows automatically — the CSV is hand-maintained.
 - Structured per-section parsing of JEP content (Goals/Motivation/etc.) — raw dump only.
 - Automatic staleness detection / re-fetching changed pages — pages are treated as immutable once released.
-- GitHub Actions automation — deferred to `PLAN.md` Phase 8, after local completion and repo creation.
+- GitHub Actions automation — deferred to `PLAN.md` Phase 10, after local completion and repo creation.
 - Support for other content types (migration guides, deprecation notices, Java EE, frameworks like Spring Boot) — the CSV schema and note templates may need to extend for these later, but the current templates should not be over-generalized preemptively for content that doesn't exist yet in the CSV.
 
 ## When Extending This Project Later
