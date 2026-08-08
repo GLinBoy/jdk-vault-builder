@@ -13,6 +13,8 @@ CACHE_DIR: Path = PROJECT_ROOT / "cache"
 VAULT_DIR: Path = PROJECT_ROOT / "vault"
 
 FETCH_DELAY_SECONDS: float = 1.0
+FETCH_TIMEOUT_SECONDS: float = 15.0
+PLAYWRIGHT_TIMEOUT_MS: int = 30_000
 
 USER_AGENT: str = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
