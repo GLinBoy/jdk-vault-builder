@@ -1,0 +1,18 @@
+[project]
+name = "jdk-vault-builder"
+version = "0.1.0"
+description = "Builds an Obsidian vault documenting Java JDK changes from a CSV of release links."
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = [".venv", "cache", "vault"]
+
+[tool.black]
+target-version = ["py310"]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.10"
+exclude = ["(^|/)cache/", "(^|/)vault/", "(^|/)venv/"]
