@@ -139,14 +139,17 @@ jep_number: 110
 title: HTTP 2 Client
 source_url: https://openjdk.org/jeps/110
 fetched: 2026-08-08
+parent: "[[JDK 9 Project Page]]"
+tags: [jdk_9, jep]
 ---
 ```
 
 Notes are Obsidian-free, independent markdown: no wikilinks, no trailing tags
 section, no other Obsidian-specific syntax in the body. Cross-note connection
-happens entirely through the frontmatter `tags:` property, which carries both
-the version tag (`jdk_7`) and the link type (`project_page` / `release_notes` /
-`jep`). JEP notes live in a `jep/` subfolder under their version's folder.
+happens through the YAML frontmatter — the `tags:` property carries both the
+version tag (`jdk_7`) and the link type (`project_page` / `release_notes` /
+`jep`), and the `parent:` property links each note to its JDK version's project
+page. JEP notes live in a `jep/` subfolder under their version's folder.
 
 Each version's combined `_combined/JDK {version} - Full.md` file ends with a
 `Tags: #jdk_{version}` line.
