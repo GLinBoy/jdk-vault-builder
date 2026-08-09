@@ -86,18 +86,20 @@ def _assert_note_files(vault_dir: Path) -> None:
         assert (folder / f"{title}.md").is_file()
 
 
-def _assert_notes_have_tags_and_no_wikilinks(vault_dir: Path) -> None:
+def _assert_notes_have_tags_parent_and_no_body_links(vault_dir: Path) -> None:
     for path in (vault_dir / "JDK 6").glob("*.md"):
         content = path.read_text(encoding="utf-8")
-        assert "[[" not in content
+        assert "[[" not in content.split("---")[-1]
         assert "tags: [jdk_6, " in content
+        assert "parent: '[[JDK 6 Project Page]]'" in content
         assert "Tags:" not in content
     for path in (vault_dir / "JDK 9").rglob("*.md"):
         if "_combined" in path.parts:
             continue
         content = path.read_text(encoding="utf-8")
-        assert "[[" not in content
+        assert "[[" not in content.split("---")[-1]
         assert "tags: [jdk_9, " in content
+        assert "parent: '[[JDK 9 Project Page]]'" in content
         assert "Tags:" not in content
         if path.parent.name == "jep":
             assert "tags: [jdk_9, jep]" in content
@@ -112,7 +114,7 @@ def test_all_end_to_end_builds_expected_vault(offline_pipeline) -> None:
     assert (vault_dir / "JDK 6").is_dir()
     assert (vault_dir / "JDK 9").is_dir()
     _assert_note_files(vault_dir)
-    _assert_notes_have_tags_and_no_wikilinks(vault_dir)
+    _assert_notes_have_tags_parent_and_no_body_links(vault_dir)
     assert len(list(cache_dir.glob("*.html"))) == 6
     assert mock_get.call_count == 6
 

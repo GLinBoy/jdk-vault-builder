@@ -5,6 +5,7 @@ jep_number: {{ link.jep_number | yaml_scalar }}
 title: {{ link.title | yaml_scalar }}
 source_url: {{ link.url | yaml_scalar }}
 fetched: {{ fetched_date | yaml_scalar }}
+{% if parent_title %}parent: {{ ("[[" ~ parent_title ~ "]]") | yaml_scalar }}{% endif %}
 tags: [{{ tags | join(", ") }}]
 ---
 

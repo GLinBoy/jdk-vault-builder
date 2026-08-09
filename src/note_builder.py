@@ -33,9 +33,22 @@ def _template_env() -> Environment:
     return env
 
 
+def find_project_page_title(links: list[JdkLink], jdk_version: int) -> str | None:
+    """Return the title of the ``project_page`` row for ``jdk_version``.
+
+    Returns ``None`` if the version has no ``project_page`` row. JEP and
+    ``release_notes`` notes use this as their ``parent`` frontmatter property.
+    """
+    for link in links:
+        if link.jdk_version == jdk_version and link.link_type == "project_page":
+            return link.title
+    return None
+
+
 def build_note(
     link: JdkLink,
     extracted: ExtractedContent,
+    all_links: list[JdkLink],
     vault_dir: Path,
 ) -> Path:
     """Render and write a note for ``link`` unless it already exists on disk.
@@ -52,12 +65,14 @@ def build_note(
         ensure_jep_folder(vault_dir, link.jdk_version)
     else:
         ensure_version_folder(vault_dir, link.jdk_version)
+    parent_title = find_project_page_title(all_links, link.jdk_version)
     rendered = (
         _template_env()
         .get_template(_TEMPLATE_NAME)
         .render(
             link=link,
             tags=[f"jdk_{link.jdk_version}", link.link_type],
+            parent_title=parent_title,
             extracted_text=extracted.text,
             fetched_date=datetime.now(timezone.utc).date().isoformat(),
         )
