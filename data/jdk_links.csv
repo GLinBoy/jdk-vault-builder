@@ -349,3 +349,14 @@ jdk_version,link_type,jep_number,title,url
 26,jep,526,Lazy Constants (Second Preview),https://openjdk.org/jeps/526
 26,jep,529,Vector API (Eleventh Incubator),https://openjdk.org/jeps/529
 26,jep,530,"Primitive Types in Patterns, instanceof, and switch (Fourth Preview)",https://openjdk.org/jeps/530
+27,project_page,,JDK 27 Project Page,https://openjdk.org/projects/jdk/27/
+27,release_notes,,Java SE 27 Release Notes,https://www.oracle.com/java/technologies/javase/27-relnote-issues.html
+27,jep,523,Make G1 the Default Garbage Collector in All Environmentsl,https://openjdk.org/jeps/523
+27,jep,527,Post-Quantum Hybrid Key Exchange for TLS 1.3,https://openjdk.org/jeps/527
+27,jep,531,Lazy Constants (Third Preview),https://openjdk.org/jeps/531
+27,jep,532,Primitive Types in Patterns instanceof and switch (Fifth Preview),https://openjdk.org/jeps/532
+27,jep,533,Structured Concurrency (Seventh Preview),https://openjdk.org/jeps/533
+27,jep,534,Compact Object Headers by Default,https://openjdk.org/jeps/534
+27,jep,536,JFR In-Process Data Redaction,https://openjdk.org/jeps/536
+27,jep,537,Vector API (Twelfth Incubator),https://openjdk.org/jeps/537
+27,jep,538,PEM Encodings of Cryptographic Objects (Third Preview),https://openjdk.org/jeps/538
