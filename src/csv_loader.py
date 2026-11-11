@@ -2,10 +2,19 @@
 
 import csv
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# ``csv.DictReader`` stores fields beyond the header row under ``restkey``.
+# Giving that key a name lets a misparsed row (e.g. an unquoted comma inside a
+# title) be rejected with a clear error instead of silently shifting columns
+# so the second half of the title ends up in the ``url`` field.
+_OVERFLOW_KEY = "__extra_columns__"
+
+_HEADER_FIELDS = ("jdk_version", "link_type", "jep_number", "title", "url")
 
 
 @dataclass
@@ -28,16 +37,19 @@ def load_csv(path: Path) -> list[JdkLink]:
     do not fail the load.
 
     Raises:
-        ValueError: if a row is malformed (missing/empty required field or a
-            non-integer ``jdk_version``/``jep_number``), with the offending
-            row number included in the message.
+        ValueError: if a row is malformed (wrong number of columns,
+            missing/empty required field, or a non-integer
+            ``jdk_version``/``jep_number``), with the offending row number
+            included in the message.
     """
     links: list[JdkLink] = []
     seen: set[tuple[object, ...]] = set()
 
     with path.open(newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
+        reader = csv.DictReader(csv_file, restkey=_OVERFLOW_KEY)
+        _check_header(reader.fieldnames)
         for row_number, row in enumerate(reader, start=2):  # row 1 is the header
+            _check_column_count(row, row_number, len(_HEADER_FIELDS))
             jdk_version = _required_str(row, "jdk_version", row_number)
             link_type = _required_str(row, "link_type", row_number)
             title = _required_str(row, "title", row_number)
@@ -90,6 +102,36 @@ def group_by_version(links: list[JdkLink]) -> dict[int, list[JdkLink]]:
     for link in links:
         grouped.setdefault(link.jdk_version, []).append(link)
     return grouped
+
+
+def _check_header(fieldnames: Sequence[str] | None) -> None:
+    """Raise if the header row does not declare exactly the expected columns."""
+
+    if fieldnames is None:  # empty file: no rows, nothing to load
+        return
+    if tuple(fieldnames) != _HEADER_FIELDS:
+        raise ValueError(
+            f"Header must be {','.join(_HEADER_FIELDS)!r}, got {','.join(fieldnames)!r}"
+        )
+
+
+def _check_column_count(row: dict[str, str], row_number: int, expected: int) -> None:
+    """Raise if ``row`` carries more columns than the header declares.
+
+    A *short* row is left with missing values and is caught by
+    ``_required_str``. A *long* row is the dangerous case: without this check
+    ``csv.DictReader`` stashes the overflow in a ``None`` key and every column
+    after the stray comma is shifted, so a title containing an unquoted comma
+    would silently produce a corrupt ``url``.
+    """
+
+    extra = row.get(_OVERFLOW_KEY)
+    if not extra:
+        return
+    raise ValueError(
+        f"Row {row_number}: expected {expected} columns but found {expected + len(extra)}; "
+        "quote any field that contains a comma"
+    )
 
 
 def _required_str(row: dict[str, str], field: str, row_number: int) -> str:

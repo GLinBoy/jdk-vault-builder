@@ -124,28 +124,39 @@ def _cmd_fetch(args: argparse.Namespace) -> None:
     links = _filter_by_version(csv_loader.load_csv(args.csv), args.version)
 
     counts = {"cached": 0, "fetched": 0, "not_found": 0, "blocked": 0}
+    failures: list[tuple[csv_loader.JdkLink, str]] = []
     for index, link in enumerate(links, start=1):
         print(f"Fetching {index}/{len(links)}: {link.url}")
         result = fetcher.fetch_url(link.url, args.cache_dir)
         counts[result.status] += 1
+        if result.status in ("not_found", "blocked"):
+            failures.append((link, result.status))
 
     summary = ", ".join(f"{name}={count}" for name, count in counts.items())
     print(f"Fetch complete: {summary}")
+    for link, status in failures:
+        print(f"  {status}: {link.url} (no note will be built for this row)")
 
 
 def _cmd_build_notes(args: argparse.Namespace) -> None:
     links = csv_loader.load_csv(args.csv)
     selected = _filter_by_version(links, args.version)
 
+    built = 0
+    skipped = 0
     for link in selected:
         cache_path = fetcher.url_to_cache_path(link.url, args.cache_dir)
         if not cache_path.exists():
             print(f"Warning: no cached HTML for {link.url}; skipping note")
+            skipped += 1
             continue
         html = cache_path.read_text(encoding="utf-8")
         extracted = content_extractor.extract_content(html)
         path = note_builder.build_note(link, extracted, links, args.vault)
         print(f"Built note: {path}")
+        built += 1
+    scope = "all versions" if args.version is None else f"JDK {args.version}"
+    print(f"Notes ({scope}): built={built}, skipped={skipped}")
 
 
 def _cmd_combine(args: argparse.Namespace) -> None:
