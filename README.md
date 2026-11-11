@@ -69,6 +69,17 @@ All path arguments default to the constants in `config.py`:
 | `--version N` | Restrict the run to a single `jdk_version` (e.g. `21`)         |
 | `--force`     | Overwrite existing combined files without prompting (`combine`, `all`) |
 
+### CSV format
+
+```
+jdk_version,link_type,jep_number,title,url
+```
+
+Any field whose value contains a comma **must be quoted**, e.g. a JEP title
+such as `"Primitive Types in Patterns, instanceof, and switch (Fifth Preview)"`.
+Unquoted commas shift every later column, so the row is rejected at load time
+with the offending line number instead of producing a broken URL.
+
 ### Examples
 
 Run the full pipeline:
@@ -101,7 +112,7 @@ Running the same command again does no re-fetching and no re-note-building —
 cached HTML and existing notes are reused as-is. Only the combined files are
 rebuilt, and the `combine` step prompts for confirmation (`[y/N]`, default no)
 unless `--force` is passed. To refresh a specific page, delete its cached HTML
-file in `cache/raw_pages/` (or the note in `JDK Changes Vault/`) and re-run.
+file in `cache/` (or the note in `JDK Changes Vault/`) and re-run.
 
 ## Project layout
 
@@ -109,7 +120,7 @@ file in `cache/raw_pages/` (or the note in `JDK Changes Vault/`) and re-run.
 config.py                  Paths, throttle settings, user agent, bot-challenge markers
 main.py                    CLI entrypoint (argparse: fetch / build-notes / combine / home / all)
 data/jdk_links.csv         Source CSV of JDK release links (hand-maintained)
-cache/raw_pages/           Archived HTML backups, keyed by SHA-256 of the URL
+cache/                     Archived HTML backups, keyed by SHA-256 of the URL
 cache/fetch.log            Fetch run logs
 JDK Changes Vault/         Generated Obsidian vault (one folder per JDK version)
 src/

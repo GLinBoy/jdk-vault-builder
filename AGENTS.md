@@ -21,7 +21,7 @@ This tool is re-run every time a new JDK version is released — updates must be
 config.py               # all paths, constants, throttle settings, bot-challenge markers
 main.py                 # CLI entrypoint (argparse: fetch / build-notes / combine / home / all)
 data/jdk_links.csv       # manually maintained source CSV (~350 rows and growing)
-cache/raw_pages/         # untouched HTML backups, keyed by sha256(url).html
+cache/                  # untouched HTML backups, keyed by sha256(url).html
 cache/fetch.log          # fetch run logs
 JDK Changes Vault/       # the generated Obsidian vault (one folder per JDK version + Home.md)
 src/
@@ -45,7 +45,7 @@ Each `src/` module is independent and stateless between calls — no module reac
 
 There is **no database, no JSON ledger, no run-tracking file**. "Has this URL/note already been processed?" is answered purely by filesystem existence:
 
-- A URL is considered fetched if `cache/raw_pages/{sha256(url)}.html` exists. If present, `fetcher.py` returns a cache hit and makes **no network call**.
+- A URL is considered fetched if `cache/{sha256(url)}.html` exists. If present, `fetcher.py` returns a cache hit and makes **no network call**.
 - A note is considered built if its `.md` file already exists in the vault. `note_builder.py` **never overwrites** an existing note.
 - The combined `_combined/JDK {version} - Full.md` file is the one exception: it is **always rebuilt from scratch** on each `combine` run (never tracked/diffed), and prompts for overwrite confirmation (default: no) unless `--force` is passed.
 
@@ -62,7 +62,7 @@ Do not add a state database, hash-comparison cache invalidation, or "last run" t
 ## Content Extraction Rules
 
 - Extraction is a **raw dump**, not a summary — mirrors what the Obsidian Web Clipper browser extension produces. Do not add LLM summarization, keyword extraction, or section-splitting logic (e.g., don't try to parse JEP pages into separate "Goals"/"Motivation" fields — that's an explicit v2 idea, not in scope now).
-- Both artifacts are kept: raw HTML in `cache/raw_pages/` (permanent backup, re-parseable) and extracted markdown text embedded in the note (used directly by Obsidian and NotebookLM/RAG).
+- Both artifacts are kept: raw HTML in `cache/` (permanent backup, re-parseable) and extracted markdown text embedded in the note (used directly by Obsidian and NotebookLM/RAG).
 - No iframe embedding of live web pages — sites frequently block iframe embedding and it doesn't survive offline use. Always archive the content, don't reference the live page as the primary artifact.
 
 ## Note & Vault Conventions
@@ -72,7 +72,7 @@ Do not add a state database, hash-comparison cache invalidation, or "last run" t
 - Notes are **Obsidian-free, independent markdown** — no `[[wikilink]]` or other Obsidian-specific syntax in the body, and no trailing tags section. Cross-note connection happens through the YAML frontmatter: the `tags:` property carries both `jdk_{version}` and the link type, and the `parent:` property links each note to its JDK version's project page. This is the deliberate replacement for the earlier wikilink-backlink scheme.
 - Vault folder structure: `JDK Changes Vault/JDK {version}/` per version, with a `_combined/` subfolder holding that version's merged NotebookLM file. JEP notes live in a `jep/` subfolder (`JDK Changes Vault/JDK {version}/jep/`); `project_page` and `release_notes` notes sit directly in the version folder. Combined files end with a `Tags: #jdk_{version}` line.
 - A root-level `JDK Changes Vault/Home.md` is regenerated on every `home`/`all` run (always overwritten, like the combiner output) — a hub page that explains the vault's purpose and summarizes its data: the versions present, note counts per version, counts by link type, and pointers to each version's combined file.
-- Because notes are never overwritten, an existing note only picks up a new format if it is **deleted and rebuilt** (from `cache/raw_pages/`, no network needed). The full vault was regenerated this way when the tag-based format was introduced.
+- Because notes are never overwritten, an existing note only picks up a new format if it is **deleted and rebuilt** (from `cache/`, no network needed). The full vault was regenerated this way when the tag-based format was introduced.
 - Filenames are sanitized via `vault_organizer.sanitize_filename()` — never write raw titles containing filesystem-unsafe characters directly to disk.
 
 ## Git Workflow

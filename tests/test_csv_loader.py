@@ -60,6 +60,44 @@ def test_load_csv_rejects_malformed_row(tmp_path: Path) -> None:
         load_csv(path)
 
 
+def test_load_csv_rejects_unquoted_comma_in_title(tmp_path: Path) -> None:
+    bad = (
+        "jdk_version,link_type,jep_number,title,url\n"
+        "27,jep,532,Primitive Types in Patterns, instanceof, and switch (Fifth Preview),"
+        "https://openjdk.org/jeps/532\n"
+    )
+    path = tmp_path / "bad_comma.csv"
+    path.write_text(bad, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Row 2.*expected 5 columns.*quote"):
+        load_csv(path)
+
+
+def test_load_csv_accepts_quoted_comma_in_title(tmp_path: Path) -> None:
+    good = (
+        "jdk_version,link_type,jep_number,title,url\n"
+        '26,jep,530,"Primitive Types in Patterns, instanceof, and switch (Fourth Preview)",'
+        "https://openjdk.org/jeps/530\n"
+    )
+    path = tmp_path / "quoted_comma.csv"
+    path.write_text(good, encoding="utf-8")
+
+    links = load_csv(path)
+
+    assert len(links) == 1
+    assert links[0].title == "Primitive Types in Patterns, instanceof, and switch (Fourth Preview)"
+    assert links[0].url == "https://openjdk.org/jeps/530"
+
+
+def test_load_csv_rejects_wrong_header(tmp_path: Path) -> None:
+    bad = "version,type,jep,title,link\n9,jep,110,HTTP 2 Client,https://openjdk.org/jeps/110\n"
+    path = tmp_path / "bad_header.csv"
+    path.write_text(bad, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Header must be"):
+        load_csv(path)
+
+
 def test_load_csv_rejects_non_integer_jep_number(tmp_path: Path) -> None:
     bad = (
         "jdk_version,link_type,jep_number,title,url\n"
